@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Derstar Options DEX</title>
+<meta name="description" content="Derstar is a decentralized options exchange on Arbitrum. Trade weekly BTC and ETH options from your wallet, settled on-chain. Join the whitelist.">
+<meta name="theme-color" content="#121212">
+<meta property="og:title" content="Derstar Options DEX">
+<meta property="og:description" content="On-chain options on Arbitrum. Weekly BTC and ETH. Whitelist open.">
+<meta property="og:image" content="/og.png">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=VT323&display=swap">
+<style>
+/* Layout: a stack of terminal windows on an 16px grid; orange #FF4E16 on greys 121212/181818/1a1a1a/242424/464646 + white; single dark look */
+:root {
+  --bg: #121212; --surface: #1a1a1a; --surface-2: #242424; --grid: #161616;
+  --ink: #ffffff; --muted: #a6a6a6; --line: #464646; --shadow: #000000;
+  --a1: #FF4E16; --on-a: #121212;
+  --f-display: "Pixelify Sans", "Trebuchet MS", sans-serif;
+  --f-body: "IBM Plex Mono", Menlo, Consolas, monospace;
+  --f-mono: "VT323", "Courier New", monospace;
+  --px: 2px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 16px 16px;
+  color: var(--ink); font-family: var(--f-mono); font-size: 22px; line-height: 1.3;
+}
+.wrap { max-width: 1360px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+:focus-visible { outline: var(--px) dashed var(--a1); outline-offset: 3px; }
+.blink { animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.sr { position: absolute; left: -9999px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; font-family: var(--f-display); font-size: 16px; font-weight: 600; letter-spacing: .05em;
+  color: var(--on-a); background: var(--a1); border: var(--px) solid var(--shadow);
+  box-shadow: inset -3px -3px 0 rgba(0,0,0,.18), 3px 3px 0 var(--shadow);
+  padding: 12px 16px; text-decoration: none; cursor: pointer; white-space: nowrap;
+}
+.btn:hover { transform: translate(-1px,-1px); box-shadow: inset -3px -3px 0 rgba(0,0,0,.18), 4px 4px 0 var(--shadow); }
+.btn:active { transform: translate(3px,3px); box-shadow: inset 3px 3px 0 rgba(0,0,0,.18); }
+.btn.ghost { background: var(--surface-2); color: var(--ink); border-color: var(--line); }
+
+/* header */
+header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: var(--px) solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 10px 18px; flex-wrap: wrap; padding-block: 10px; }
+.nav .btn { padding: 10px 12px; font-size: 11px; }
+.brand { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
+.brand b { font-family: var(--f-display); font-weight: 700; font-size: 20px; line-height: 1.1; letter-spacing: .03em; display: block; }
+.brand small { color: var(--muted); font-size: 18px; }
+.menu { display: flex; gap: 4px 14px; font-size: 20px; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
+.menu a { color: var(--ink); text-decoration: none; }
+.menu a:hover { background: var(--a1); color: var(--on-a); }
+
+/* terminal window */
+.win { background: var(--surface); border: var(--px) solid var(--line); box-shadow: 6px 6px 0 var(--shadow); position: relative; overflow: hidden; }
+.win::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.06) 0 2px, transparent 2px 4px); }
+.win-bar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--a1); color: var(--on-a); border-bottom: var(--px) solid var(--shadow); }
+.win-bar i { width: 10px; height: 10px; background: var(--on-a); display: block; }
+.win-bar span { margin-left: 8px; }
+.win-bar em { margin-left: auto; font-style: normal; }
+.win-body { padding: 22px; display: grid; gap: 22px; }
+.win-body > * { min-width: 0; }
+.prompt { color: var(--muted); overflow-wrap: anywhere; }
+.prompt b { color: var(--a1); font-weight: 400; }
+.out { color: var(--a1); }
+section { padding-block: 28px; scroll-margin-top: 80px; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 28px; align-items: center; }
+.hero > * { min-width: 0; }
+.boot { color: var(--muted); }
+.boot span { color: var(--a1); }
+.hero h1 { font-size: clamp(40px, 6.4vw, 84px); line-height: 1.05; margin-block: 14px 16px; }
+.hero h1 em { font-style: normal; color: var(--a1); }
+.lead { font-family: var(--f-body); font-size: 17px; line-height: 1.65; color: var(--muted); max-width: 52ch; }
+.cta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 22px; }
+.logo-stage { background: var(--bg); border: var(--px) solid var(--line); aspect-ratio: 1; max-width: min(100%, 440px); width: 100%; justify-self: end; display: grid; place-items: center; position: relative; }
+.logo-stage canvas { width: 78%; height: auto; }
+.logo-stage .tag { position: absolute; left: 10px; top: 6px; color: var(--muted); font-size: 20px; }
+.logo-stage .tag2 { position: absolute; right: 10px; bottom: 6px; color: var(--a1); font-size: 20px; }
+
+/* stats */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 2px dashed var(--line); }
+.stat { padding: 14px 16px; border-right: 2px dashed var(--line); min-width: 0; }
+.stat:last-child { border-right: 0; }
+.stat .k { color: var(--muted); font-size: 20px; }
+.stat .v { font-family: var(--f-display); font-size: clamp(14px, 2vw, 20px); margin-top: 6px; font-variant-numeric: tabular-nums; }
+.stat .d { color: var(--a1); font-size: 20px; }
+
+/* trading */
+.trade { display: grid; grid-template-columns: 1fr 320px; gap: 22px; align-items: start; }
+.trade > * { min-width: 0; }
+.ctrls { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin-bottom: 14px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.seg .l { color: var(--muted); margin-right: 4px; }
+.chip { font: inherit; font-size: 20px; line-height: 1; padding: 6px 10px; cursor: pointer; background: var(--surface-2); color: var(--ink); border: 2px solid var(--line); }
+.chip[aria-pressed="true"] { background: var(--a1); color: var(--on-a); border-color: var(--shadow); }
+.spot { color: var(--muted); }
+.spot b { color: var(--ink); font-weight: 400; }
+.tbl { overflow-x: auto; }
+.chain { border-collapse: collapse; width: 100%; min-width: 600px; font-variant-numeric: tabular-nums; }
+.chain th { color: var(--muted); font-weight: 400; text-align: right; padding: 4px 8px; border-bottom: 2px dashed var(--line); }
+.chain th.side { text-align: center; color: var(--a1); border-bottom: 0; }
+.chain td { text-align: right; padding: 3px 8px; }
+.chain .k { text-align: center; background: var(--surface-2); font-family: var(--f-display); font-size: 11px; color: var(--ink); }
+.chain td.itm { background: rgba(255,78,22,.07); }
+.chain tr.atm .k { background: var(--a1); color: var(--on-a); }
+.q { font: inherit; color: var(--ink); background: none; border: 2px solid transparent; padding: 0 4px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.q:hover { border-color: var(--a1); }
+.q.on { background: var(--a1); color: var(--on-a); }
+.legend { color: var(--muted); font-size: 19px; margin-top: 10px; }
+
+.ticket { background: var(--bg); border: var(--px) solid var(--line); padding: 16px; display: grid; gap: 10px; }
+.ticket h3 { font-size: 11px; color: var(--a1); }
+.ticket .sel { font-family: var(--f-display); font-size: 12px; line-height: 1.6; }
+.row { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed var(--line); padding-bottom: 4px; font-variant-numeric: tabular-nums; }
+.row span:first-child { color: var(--muted); }
+.qty { display: flex; gap: 6px; align-items: center; }
+.qty button { font: inherit; width: 34px; height: 34px; background: var(--surface-2); color: var(--ink); border: 2px solid var(--line); cursor: pointer; }
+.qty input { font: inherit; width: 70px; text-align: center; background: var(--surface); color: var(--ink); border: 2px solid var(--line); padding: 2px; }
+.ticket .btn { justify-content: center; }
+.payoff { width: 100%; height: auto; border: 2px solid var(--line); background: var(--surface); }
+
+/* text sections */
+.steps { display: grid; gap: 6px; }
+.steps div { display: grid; grid-template-columns: 44px 1fr; gap: 8px; }
+.steps b { color: var(--a1); font-weight: 400; }
+.st { border-collapse: collapse; width: 100%; min-width: 560px; }
+.st th { text-align: left; color: var(--muted); font-weight: 400; border-bottom: 2px dashed var(--line); padding: 4px 16px 4px 0; }
+.st td { padding: 6px 16px 6px 0; vertical-align: top; }
+.st td small { display: block; color: var(--muted); font-size: 19px; }
+.tagst { display: inline-block; padding: 0 8px; border: 2px solid var(--line); white-space: nowrap; }
+.tagst.done { background: var(--a1); color: var(--on-a); border-color: var(--shadow); }
+.tagst.wip { color: var(--a1); border-color: var(--a1); }
+.tagst.plan { color: var(--muted); }
+.road { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.road > div { border: 2px solid var(--line); padding: 12px; min-width: 0; }
+.road > div.now { border-color: var(--a1); }
+.road b { color: var(--a1); font-weight: 400; display: block; }
+.road p { color: var(--muted); font-family: var(--f-body); font-size: 17px; line-height: 1.5; margin-top: 6px; }
+.chip[disabled] { opacity: .5; cursor: not-allowed; }
+@media (max-width: 900px) { .road { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .road { grid-template-columns: 1fr; } }
+.pools { border-collapse: collapse; width: 100%; min-width: 560px; }
+.pools th { text-align: left; color: var(--muted); font-weight: 400; border-bottom: 2px dashed var(--line); padding: 4px 16px 4px 0; }
+.pools td { padding: 6px 16px 6px 0; vertical-align: top; }
+.pools td:first-child { color: var(--a1); white-space: nowrap; }
+/* whitelist */
+.wl { display: grid; grid-template-columns: 1.2fr 1fr; gap: 22px; align-items: start; }
+.wl > * { min-width: 0; }
+.wl p.note { font-family: var(--f-body); font-size: 16px; line-height: 1.65; color: var(--muted); max-width: 56ch; }
+.wl-form { display: grid; gap: 12px; }
+.wl-line { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.wl-line label { color: var(--a1); }
+.wl-line input { font: inherit; flex: 1 1 260px; min-width: 0; background: var(--bg); color: var(--ink); border: 0; border-bottom: var(--px) solid var(--a1); padding: 4px 6px; }
+.wl-line input[aria-invalid="true"] { border-bottom-color: var(--ink); }
+.wl-msg { min-height: 1.3em; overflow-wrap: anywhere; }
+.wl-msg.err { color: var(--ink); }
+.wl-msg.err::before { content: "ERR: "; color: var(--a1); }
+.chainbadge { display: inline-flex; gap: 8px; align-items: center; border: 2px solid var(--line); padding: 2px 8px; color: var(--muted); }
+.chainbadge i { width: 10px; height: 10px; background: var(--a1); display: block; }
+.wl-side { background: var(--bg); border: var(--px) solid var(--line); padding: 16px; display: grid; gap: 10px; }
+.wl-side h3 { font-size: 15px; letter-spacing: .08em; color: var(--a1); }
+.wl-side ol { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 4px; }
+.wl-side li { display: grid; grid-template-columns: 34px 1fr; }
+.wl-side li b { color: var(--a1); font-weight: 400; }
+.wl-admin { border-top: 2px dashed var(--line); padding-top: 10px; display: grid; gap: 8px; }
+.wl-admin .list { max-height: 220px; overflow: auto; font-size: 19px; color: var(--muted); overflow-wrap: anywhere; }
+@media (max-width: 900px) { .wl { grid-template-columns: 1fr; } }
+details { border-bottom: 1px dashed var(--line); padding-block: 8px; }
+summary { cursor: pointer; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "[+] "; color: var(--a1); }
+details[open] summary::before { content: "[-] "; }
+details p { color: var(--muted); font-family: var(--f-body); font-size: 16px; line-height: 1.65; margin-top: 8px; max-width: 90ch; }
+
+/* links */
+.links { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 22px; margin-top: 14px; }
+.links > div { min-width: 0; }
+.links h3 { font-size: 15px; color: var(--muted); letter-spacing: .1em; margin-bottom: 12px; }
+.links ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.links li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.links .off { color: var(--muted); }
+.links .tagst { font-size: 16px; line-height: 1.2; }
+.links a { color: var(--ink); text-decoration: none; }
+.links a::after { content: " ↗"; color: var(--a1); }
+.links a:hover { background: var(--a1); color: var(--on-a); }
+.links a:hover::after { color: var(--on-a); }
+@media (max-width: 520px) { .links { gap: 24px 12px; } .links li { font-size: 19px; gap: 2px 6px; } .links .tagst { font-size: 13px; padding: 0 4px; } }
+footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px 24px; color: var(--muted); border-top: var(--px) dashed var(--line); padding-block: 18px 40px; margin-top: 20px; }
+
+@media (max-width: 700px) { header { position: static; } section { scroll-margin-top: 0; } }
+@media (max-width: 900px) {
+  .hero, .trade { grid-template-columns: 1fr; }
+  .logo-stage { max-width: 360px; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stat:nth-child(2) { border-right: 0; }
+  .stat:nth-child(-n+2) { border-bottom: 2px dashed var(--line); }
+}
+@media (max-width: 520px) { .win-bar em { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .blink { animation: none; }
+  .btn:hover, .btn:active { transform: none; }
+}
+</style>
+
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top"><canvas class="px" id="logo-sm" aria-hidden="true"></canvas><span><b>DERSTAR</b><small>DeFi Options DEX</small></span></a>
+    <ul class="menu">
+      <li><a href="#whitelist">[1] Whitelist</a></li>
+      <li><a href="#faq">[2] FAQ</a></li>
+    </ul>
+  </div>
+</header>
+
+<main id="top" class="wrap">
+  <section>
+    <div class="win">
+      <div class="win-bar"><i></i><i></i><i></i><span>derstar@dex: ~</span><em>arbitrum · testnet soon</em></div>
+      <div class="win-body hero">
+        <div>
+          <h1>On-chain <em>options</em><span class="blink">_</span></h1>
+          <p class="lead">Derstar is a decentralized options exchange on Arbitrum One. Trade BTC and ETH options straight from your wallet. Every trade settles on-chain.</p>
+          <div class="cta">
+            <a class="btn" href="#whitelist">▶ JOIN WHITELIST</a>
+            <a class="btn ghost" href="#faq">READ FAQ</a>
+          </div>
+        </div>
+        <div class="logo-stage">
+          <span class="tag">LOGO.BIN 64×64</span>
+          <canvas class="px" id="logo-lg" aria-label="Derstar logo: an orange pixel star with a check mark on an orbit"></canvas>
+          <span class="tag2">● LIVE</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+
+
+
+
+  <section id="whitelist">
+    <div class="win">
+      <div class="win-bar"><i></i><i></i><i></i><span>derstar@dex: ~/whitelist</span><em>arbitrum one</em></div>
+      <div class="win-body">
+        <div class="prompt"><b>derstar@dex</b>:~/whitelist$ join --chain arbitrum</div>
+        <div class="wl">
+          <form class="wl-form" id="wl-form" novalidate>
+            <h2 style="font-size:clamp(26px,3vw,36px);line-height:1.15">Get early access</h2>
+            <p class="note">Drop your Arbitrum wallet address to join the Derstar whitelist. Whitelisted wallets get first access to the Derstar testnet on Arbitrum Sepolia. Mainnet perks: soon.</p>
+            <div><span class="chainbadge"><i></i>Arbitrum One · chain id 42161</span></div>
+            <div class="wl-line">
+              <label for="wl-addr">address&gt;</label>
+              <input id="wl-addr" name="address" autocomplete="off" spellcheck="false" placeholder="0x0000…0000" maxlength="42">
+              <button class="btn" type="submit" id="wl-btn">JOIN</button>
+            </div>
+            <div class="wl-msg out" id="wl-msg" aria-live="polite"></div>
+          </form>
+          <div class="wl-side">
+            <h3>RULES</h3>
+            <ol>
+              <li><b>01</b><span>One address per person.</span></li>
+              <li><b>02</b><span>Use a wallet you control on Arbitrum One. No exchange deposit addresses.</span></li>
+              <li><b>03</b><span>We will never ask for your seed phrase or a signature to join.</span></li>
+            </ol>
+            <div class="wl-admin" id="wl-admin" hidden>
+              <h3>OWNER VIEW · <span id="wl-count">0</span> ADDRESSES</h3>
+              <div class="list" id="wl-list"></div>
+              <div><button class="btn ghost" type="button" id="wl-copy">COPY CSV</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="win">
+      <div class="win-bar"><i></i><i></i><i></i><span>derstar@dex: ~/faq</span></div>
+      <div class="win-body">
+        <div class="prompt"><b>derstar@dex</b>:~/faq$ man derstar</div>
+        <div>
+          <details open><summary>What is Derstar?</summary><p>A decentralized options exchange on Arbitrum One. You will trade BTC and ETH options straight from your wallet, with every trade settled on-chain.</p></details>
+          <details><summary>What do I get for joining the whitelist?</summary><p>First access to the Derstar testnet on Arbitrum Sepolia, before it opens to everyone. Mainnet perks: soon.</p></details>
+          <details><summary>When does the testnet go live?</summary><p>Soon. We will announce the date on our official channels first, and whitelisted wallets get in before anyone else.</p></details>
+          <details><summary>Does joining cost anything?</summary><p>No. You only submit an address: no transaction, no gas, no wallet connection. The testnet runs on test tokens, so you will not need real money there either.</p></details>
+          <details><summary>Is it safe to share my address?</summary><p>A wallet address is already public, and it is the only thing we store. Joining never asks for a signature or a transaction. We will never ask for your seed phrase or private key, and we will never DM you first.</p></details>
+          <details><summary>Which address should I use?</summary><p>Any wallet you control that works on Arbitrum, such as MetaMask or Rabby. Do not use an exchange deposit address. Testnet access is tied to the address you submit.</p></details>
+          <details><summary>How do I know I’m on the list?</summary><p>You will see a confirmation right after you submit. If you submit the same address again, the form tells you it is already on the list.</p></details>
+          <details><summary>Is there a token or an airdrop?</summary><p>No token has been announced. Any news will come only from official Derstar channels. Ignore DMs offering a Derstar token, a presale or a paid whitelist spot: they are scams.</p></details>
+          <details><summary>What will I be able to trade?</summary><p>BTC and ETH options with weekly expiries, settled every Friday at 08:00 UTC. Options are cash-settled and paid for in USDC. As a buyer, the most you can lose is the premium you paid.</p></details>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="links" aria-label="Resources and community">
+    <div class="prompt"><b>derstar@dex</b>:~$ ls links/</div>
+    <div class="links">
+      <div><h3>RESOURCES</h3><ul>
+        <li><span class="off">Docs</span><span class="tagst plan">SOON</span></li>
+        <li><span class="off">GitHub</span><span class="tagst plan">SOON</span></li>
+        <li><span class="off">Audits</span><span class="tagst plan">SOON</span></li>
+        <li><span class="off">Brand kit</span><span class="tagst plan">SOON</span></li>
+      </ul></div>
+      <div><h3>COMMUNITY</h3><ul>
+        <li><a href="https://x.com/Derstar_options" target="_blank" rel="noopener noreferrer">X · @Derstar_options</a></li>
+        <li><span class="off">Telegram</span><span class="tagst plan">SOON</span></li>
+        <li><span class="off">Discord</span><span class="tagst plan">SOON</span></li>
+        <li><span class="off">Blog</span><span class="tagst plan">SOON</span></li>
+      </ul></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap"><span>© 2026 DERSTAR · DeFi Options DEX</span></div></footer>
+
+<script>
+(() => {
+  const LOGO = ["................................................................","................................................................","..........................gggggggggggg..........................","......................ggggg..........ggggg......................","....................ggg..................ggg....................","..................gg........................gg..................","................gg............................gg................","..............gg................................gg..............",".............gg................oo................gg.............","............gg.............hhhhoohhhh.............gwww..........","...........gg...........hhhh...oo...hhhh...........www..........","..........g...........hh......wooo......hh.........www..........",".........gg.........hh........oooo........hh.......wwwg.........","........gg........hh..........oooo..........hh........gg........",".......gg........hh..........wooooo..........hh........gg.......",".......g........hh...........oooooo...........hh........g.......","......g........hh...........wooooooo...........hh........g......","......g.......hh...........wooooooooo...........hh.......g......",".....g.......hh............oooooooooo............hh.......g.....",".....g.......h............wooooooooooo............h.......g.....","....g.......h............wooooooooooooo............h.......g....","....g.......h...........wooooooooooooooo...........h.......g....","...gg......h............oooooooooooooooo............h......gg...","...g.......h...........wooooooooooooooooo...........h.......g...","...g......h..........wwoooooooooooooooooooo..........h......g...","...g......h.........wooooooooooooooooooooooo.........h......g...","..gg......h........woooooooooooooooookkkooooo........h......gg..","..g......hh......wwooooooooooooooooookkkooooooo......hh......g..","..g......h......woooooooooooooooooookkkooooooooo......h......g..","..g......h....wwoooooooooooooooooookkkoooooooooooo....h......g..","..g......h.oooooooooooooooooooooookkkoooooooooooooooo.h......g..","..g.....oooooooooooooooooooooooookkkkooooooooooooooooooo.....g..","..g.....ooooooooooooooooooooooookkkkoooooooooooooooooooo.....g..","..g......h.oooooooooooooooooooookkkoooooooooooooooooo.h......g..","..g......h....oooooooooooooooookkkoooooooooooooooo....h......g..","..g......h......oooooookkkkkkkkkkooooooooooooooo......h......g..","..g......hh......ooooookkkkkkkkkooooooooooooooo......hh......g..","..gg......h........oooooooooooooooooooooooooo........h......gg..","...g......h.........oooooooooooooooooooooooo.........h......g...","...g......h..........oooooooooooooooooooooo..........h......g...","...g.......h...........oooooooooooooooooo...........h.......g...","...gg......h............oooooooooooooooo............h......gg...","....g.......h...........oooooooooooooooo...........h.......g....","....g.......h............oooooooooooooo............h.......g....",".....g.......h............oooooooooooo............h.......g.....",".....g.......hh............oooooooooo............hh.......g.....","......g.......hh...........oooooooooo...........hh.......g......","......g........hh...........oooooooo...........hh........g......",".......g........hh...........oooooo...........hh........g.......",".......gg........hh..........oooooo..........hh........gg.......","........gg........hh..........oooo..........hh........gg........",".........gg.........hh........oooo........hh.........gg.........","..........g...........hh......oooo......hh...........g..........","...........gg...........hhhh...oo...hhhh...........gg...........","............gg.............hhhhoohhhh.............gg............",".............gg................oo................gg.............","..............gg................................gg..............","................gg............................gg................","..................gg........................gg..................","....................ggg..................ggg....................","......................ggggg..........ggggg......................","..........................gggggggggggg..........................","................................................................","................................................................"];
+  const C = { o: "#FF4E16", w: "#ffffff", g: "#464646", h: "#242424", k: "#121212" };
+  function drawLogo(cv, size, small) {
+    cv.width = 64; cv.height = 64; cv.style.width = size + "px"; cv.style.height = size + "px";
+    const c = cv.getContext("2d");
+    LOGO.forEach((r, y) => [...r].forEach((ch, x) => {
+      if (small && (ch === "g" || ch === "h")) return; // tiny version keeps the star only
+      if (C[ch]) { c.fillStyle = C[ch]; c.fillRect(x, y, 1, 1); }
+    }));
+  }
+  drawLogo(document.getElementById("logo-sm"), 40, false);
+  const big = document.getElementById("logo-lg"); drawLogo(big, 256, false); big.style.width = ""; big.style.height = "";
+
+
+  // ---- whitelist ----
+  // Two backends: inside the claude.ai preview it saves to the artifact's db;
+  // on the deployed site (Vercel) it posts to /api/whitelist.
+  const wlForm = document.getElementById("wl-form"), wlIn = document.getElementById("wl-addr"), wlMsg = document.getElementById("wl-msg"), wlBtn = document.getElementById("wl-btn");
+  const ADDR = /^0x[0-9a-fA-F]{40}$/;
+  const short = a => a.slice(0, 6) + "…" + a.slice(-4);
+  const say = (t, err) => { wlMsg.textContent = t; wlMsg.classList.toggle("err", !!err); };
+  let backend = null;
+  const isPreview = !!(window.claude && typeof window.claude.use === "function");
+  const api = {
+    async join(address) {
+      const r = await fetch("/api/whitelist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ address }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || "Server error. Try again in a minute.");
+      return j;
+    }
+  };
+  async function setupPreview() {
+    const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+    if (!db || !user) { say("Preview: sign in to claude.ai to try the whitelist.", true); return; }
+    const id = await user.id();
+    const mine = db.doc("whitelist/" + id);
+    backend = {
+      async join(address) { await mine.set({ address, chain: "arbitrum", joinedAt: new Date().toISOString() }); return { ok: true }; }
+    };
+    try { const d = await mine.get(); const v = d && (d.data ? d.data() : d); if (v && v.address) say("> already on the list: " + short(v.address)); } catch (e) {}
+    if (await user.isOwner()) {
+      const box = document.getElementById("wl-admin"); box.hidden = false;
+      let rows = [];
+      db.collection("whitelist").orderBy("joinedAt", "desc").onSnapshot(snap => {
+        rows = (snap.docs || snap).map(d => (d.data ? d.data() : d)).filter(r => r && r.address);
+        document.getElementById("wl-count").textContent = rows.length;
+        const list = document.getElementById("wl-list"); list.textContent = "";
+        rows.forEach(r => { const div = document.createElement("div"); div.textContent = r.address; list.appendChild(div); });
+      }, () => {});
+      document.getElementById("wl-copy").onclick = async () => {
+        const csv = "address,chain,joined_at\n" + rows.map(r => [r.address, r.chain, r.joinedAt].join(",")).join("\n");
+        try { await navigator.clipboard.writeText(csv); say("> CSV copied: " + rows.length + " addresses"); } catch (e) { say("Copy blocked by the browser.", true); }
+      };
+    }
+  }
+  if (isPreview) setupPreview(); else backend = api;
+  wlIn.addEventListener("input", () => { wlIn.removeAttribute("aria-invalid"); say(""); });
+  wlForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const a = wlIn.value.trim();
+    if (!ADDR.test(a)) { wlIn.setAttribute("aria-invalid", "true"); say("That is not a valid address. It should start with 0x and have 40 hex characters.", true); return; }
+    if (!backend) { say("Whitelist is still loading. Try again in a second.", true); return; }
+    wlBtn.disabled = true; say("> submitting " + short(a) + " …");
+    try {
+      const r = await backend.join(a);
+      say(r.already ? "> already on the list: " + short(a) : "> you're in: " + short(a) + " added to the Arbitrum whitelist");
+      wlIn.value = "";
+    } catch (err) {
+      say(err && (err.code === "not_granted" || err.code === "invalid_argument") ? "This preview only lets contributors join. The live site accepts everyone." : (err.message || "Could not save. Try again."), true);
+    } finally { wlBtn.disabled = false; }
+  });
+})();
+</script>
+
+</body>
+</html>
