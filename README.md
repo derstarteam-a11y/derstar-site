@@ -64,13 +64,14 @@ The site deploys to **Vercel** straight from this repo: every push to `main` goe
 
 - Visitors submit an Arbitrum One address (`0x` + 40 hex). Addresses are lowercased and deduplicated.
 - Rate limit: 10 submissions per IP per hour.
-- Export all addresses as CSV: `https://<your-domain>/api/whitelist?token=<ADMIN_TOKEN>`
+- Export all addresses as CSV: `https://derstar.xyz/api/whitelist?token=<ADMIN_TOKEN>`
 
 ## Links
 
-Website · soon  
+Website · [derstar.xyz](https://derstar.xyz)  
 Docs · soon  
-X / Twitter · [@Derstar_options](https://x.com/Derstar_options)
+X / Twitter · [@Derstar_options](https://x.com/Derstar_options)  
+Discord · [discord.gg/yAawhGKQxP](https://discord.gg/yAawhGKQxP)
 
 ---
 
