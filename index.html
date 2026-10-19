@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Derstar Options DEX</title>
-<meta name="description" content="Derstar is a decentralized options exchange on Arbitrum. Trade weekly BTC and ETH options from your wallet, settled on-chain. Join the whitelist.">
+<meta name="description" content="Derstar is a decentralized options exchange on Arbitrum. Trade weekly BTC and ETH options from your wallet, settled on-chain. Whitelist soon.">
 <meta name="theme-color" content="#121212">
 <meta property="og:title" content="Derstar Options DEX">
-<meta property="og:description" content="On-chain options on Arbitrum. Weekly BTC and ETH. Whitelist open.">
+<meta property="og:description" content="On-chain options on Arbitrum. Weekly BTC and ETH. Whitelist soon.">
 <link rel="canonical" href="https://derstar.xyz/">
 <meta property="og:url" content="https://derstar.xyz/">
 <meta property="og:type" content="website">
@@ -170,6 +170,9 @@ section { padding-block: 28px; scroll-margin-top: 80px; }
 /* whitelist */
 .wl { display: grid; grid-template-columns: 1.2fr 1fr; gap: 22px; align-items: start; }
 .wl > * { min-width: 0; }
+.wl p.note a { color: var(--a1); }
+.wl-line input:disabled { opacity: .6; cursor: not-allowed; }
+#wl-btn[disabled] { opacity: .55; cursor: not-allowed; transform: none; }
 .wl p.note { font-family: var(--f-body); font-size: 16px; line-height: 1.65; color: var(--muted); max-width: 56ch; }
 .wl-form { display: grid; gap: 12px; }
 .wl-line { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
@@ -247,7 +250,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <h1>On-chain <em>options</em><span class="blink">_</span></h1>
           <p class="lead">Derstar is a decentralized options exchange on Arbitrum One. Trade BTC and ETH options straight from your wallet. Every trade settles on-chain.</p>
           <div class="cta">
-            <a class="btn" href="#whitelist">▶ JOIN WHITELIST</a>
+            <a class="btn" href="#whitelist">▶ WHITELIST · SOON</a>
             <a class="btn ghost" href="#faq">READ FAQ</a>
           </div>
         </div>
@@ -270,18 +273,18 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     <div class="win">
       <div class="win-bar"><i></i><i></i><i></i><span>derstar@dex: ~/whitelist</span><em>arbitrum one</em></div>
       <div class="win-body">
-        <div class="prompt"><b>derstar@dex</b>:~/whitelist$ join --chain arbitrum</div>
+        <div class="prompt"><b>derstar@dex</b>:~/whitelist$ status</div>
         <div class="wl">
           <form class="wl-form" id="wl-form" novalidate>
             <h2 style="font-size:clamp(26px,3vw,36px);line-height:1.15">Get early access</h2>
-            <p class="note">Drop your Arbitrum wallet address to join the Derstar whitelist. Whitelisted wallets get first access to the Derstar testnet on Arbitrum Sepolia. Mainnet perks: soon.</p>
+            <p class="note">The Derstar whitelist opens soon. Whitelisted wallets will get first access to the Derstar testnet on Arbitrum Sepolia. Follow us on <a href="https://x.com/Derstar_options" target="_blank" rel="noopener noreferrer">X</a> and join our <a href="https://discord.gg/yAawhGKQxP" target="_blank" rel="noopener noreferrer">Discord</a> to know the moment it opens.</p>
             <div><span class="chainbadge"><i></i>Arbitrum One · chain id 42161</span></div>
             <div class="wl-line">
               <label for="wl-addr">address&gt;</label>
-              <input id="wl-addr" name="address" autocomplete="off" spellcheck="false" placeholder="0x0000…0000" maxlength="42">
-              <button class="btn" type="submit" id="wl-btn">JOIN</button>
+              <input id="wl-addr" name="address" autocomplete="off" spellcheck="false" placeholder="whitelist opens soon" maxlength="42" disabled>
+              <button class="btn" type="submit" id="wl-btn" disabled>SOON</button>
             </div>
-            <div class="wl-msg out" id="wl-msg" aria-live="polite"></div>
+            <div class="wl-msg out" id="wl-msg" aria-live="polite">&gt; status: soon</div>
           </form>
           <div class="wl-side">
             <h3>RULES</h3>
@@ -361,6 +364,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   // Two backends: inside the claude.ai preview it saves to the artifact's db;
   // on the deployed site (Vercel) it posts to /api/whitelist.
   const wlForm = document.getElementById("wl-form"), wlIn = document.getElementById("wl-addr"), wlMsg = document.getElementById("wl-msg"), wlBtn = document.getElementById("wl-btn");
+  const WHITELIST_OPEN = false; // flip to true when the whitelist opens
   const ADDR = /^0x[0-9a-fA-F]{40}$/;
   const short = a => a.slice(0, 6) + "…" + a.slice(-4);
   const say = (t, err) => { wlMsg.textContent = t; wlMsg.classList.toggle("err", !!err); };
@@ -402,6 +406,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   wlIn.addEventListener("input", () => { wlIn.removeAttribute("aria-invalid"); say(""); });
   wlForm.addEventListener("submit", async e => {
     e.preventDefault();
+    if (!WHITELIST_OPEN) { say("> whitelist opens soon"); return; }
     const a = wlIn.value.trim();
     if (!ADDR.test(a)) { wlIn.setAttribute("aria-invalid", "true"); say("That is not a valid address. It should start with 0x and have 40 hex characters.", true); return; }
     if (!backend) { say("Whitelist is still loading. Try again in a second.", true); return; }
