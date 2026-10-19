@@ -4,7 +4,7 @@
 
 <p align="center">
   <b>On-chain options DEX on Arbitrum.</b><br>
-  Weekly BTC and ETH options · settled on-chain · testnet soon · whitelist open
+  Weekly BTC and ETH options · settled on-chain · testnet soon · whitelist soon
 </p>
 
 ---
