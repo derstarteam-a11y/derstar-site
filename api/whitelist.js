@@ -34,6 +34,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  if (process.env.WHITELIST_OPEN !== "1") return res.status(403).json({ error: "The whitelist opens soon." });
 
   const address = String((req.body && req.body.address) || "").trim();
   if (!ADDR.test(address)) return res.status(400).json({ error: "That is not a valid address. It should start with 0x and have 40 hex characters." });
